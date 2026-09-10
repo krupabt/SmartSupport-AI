@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} — SmartSupport AI{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="saas-card p-5">
+        <div class="feature-icon-wrapper bg-primary-subtle text-primary mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.8rem;">
+          <i class="bi bi-clock-history"></i>
+        </div>
+        
+        <span class="badge bg-primary-subtle text-primary mb-2">Scheduled for {{ phase }}</span>
+        <h3 class="fw-bold text-dark mb-2">{{ feature_name }}</h3>
+        <p class="text-muted mb-4">
+          {{ description }}
+        </p>
+
+        <div class="d-flex justify-content-center gap-2">
+          <a href="{{ back_url }}" class="btn btn-secondary-custom">
+            <i class="bi bi-arrow-left me-1"></i> Go Back
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

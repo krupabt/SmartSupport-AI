@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}{{ document.title }} — Document Inspector{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.admin_dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('main.admin_knowledge_base') }}" class="text-decoration-none">Knowledge Base</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ document.title }}</li>
+    </ol>
+  </nav>
+
+  <!-- Document Header Banner -->
+  <div class="saas-card p-4 mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 pb-3 border-bottom">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="badge bg-light text-uppercase text-secondary border font-monospace">{{ document.document_type }}</span>
+          <span class="badge bg-primary-subtle text-primary">{{ document.category }}</span>
+          {% if document.status == 'ACTIVE' %}
+            <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-circle me-1"></i> Active</span>
+          {% elif document.status == 'FAILED' %}
+            <span class="badge bg-danger-subtle text-danger border"><i class="bi bi-exclamation-triangle me-1"></i> Failed</span>
+          {% else %}
+            <span class="badge bg-info-subtle text-info border">{{ document.status }}</span>
+          {% endif %}
+        </div>
+        <h3 class="fw-bold text-dark mb-1">{{ document.title }}</h3>
+        <div class="text-muted small font-monospace">
+          Filename: {{ document.filename }} &bull; Ingested {{ document.created_at.strftime('%d %B %Y, %I:%M %p') }}
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <form method="POST" action="{{ url_for('main.admin_knowledge_reindex', doc_id=document.id) }}">
+          <button type="submit" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-arrow-repeat me-1"></i> Re-index Chunks
+          </button>
+        </form>
+        <form method="POST" action="{{ url_for('main.admin_knowledge_delete', doc_id=document.id) }}" onsubmit="return confirm('Delete this document and all its indexed chunks?');">
+          <button type="submit" class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-trash me-1"></i> Delete
+          </button>
+        </form>
+        <a href="{{ url_for('main.admin_knowledge_base') }}" class="btn btn-secondary-custom btn-sm">
+          <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+      </div>
+    </div>
+
+    <!-- Metadata Details -->
+    <div class="row g-3 pt-3 small">
+      <div class="col-md-3">
+        <span class="text-muted d-block">Total Chunks:</span>
+        <strong class="text-dark fs-6">{{ document.chunk_count }} chunks</strong>
+      </div>
+      <div class="col-md-3">
+        <span class="text-muted d-block">Content SHA-256 Hash:</span>
+        <code class="text-muted text-break">{{ document.content_hash[:20] }}...</code>
+      </div>
+      <div class="col-md-6">
+        <span class="text-muted d-block">File Path:</span>
+        <code class="text-muted text-break">{{ document.file_path }}</code>
+      </div>
+      {% if document.description %}
+        <div class="col-12">
+          <span class="text-muted d-block">Summary:</span>
+          <p class="text-dark mb-0">{{ document.description }}</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Chunks Section Header -->
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold text-dark mb-0">
+      <i class="bi bi-diagram-3 text-primary me-2"></i> Indexed Text Chunks ({{ chunks|length }})
+    </h5>
+    <span class="text-muted small">All chunks are embedded via Sentence Transformers and indexed in FAISS</span>
+  </div>
+
+  <!-- Chunks Accordion / List -->
+  <div class="d-flex flex-column gap-3">
+    {% for chunk in chunks %}
+      <div class="saas-card p-3">
+        <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-2">
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-primary text-white font-monospace">Chunk #{{ chunk.chunk_index }}</span>
+            {% if chunk.page_number %}
+              <span class="badge bg-light text-muted border">Page {{ chunk.page_number }}</span>
+            {% endif %}
+            <span class="text-muted small">({{ chunk.content|length }} characters)</span>
+          </div>
+          <span class="text-muted small font-monospace">DB ID: {{ chunk.id }}</span>
+        </div>
+        <div class="bg-light p-3 rounded border text-dark font-monospace small" style="white-space: pre-wrap; line-height: 1.5;">
+          {{ chunk.content }}
+        </div>
+      </div>
+    {% else %}
+      <div class="saas-card p-5 text-center text-muted">
+        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+        <p class="mb-0">No chunks indexed for this document.</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

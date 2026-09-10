@@ -1,0 +1,19 @@
+# Subscription Cancellation and Billing Policy
+
+## 1. Plan Types & Billing Cycles
+- SmartSupport AI offers Monthly and Annual subscription plans.
+- Monthly subscriptions auto-renew on the same calendar day each month.
+- Annual plans auto-renew every 365 days from the activation date.
+
+## 2. Cancellation Process
+- Customers can cancel their subscription at any time directly through the Billing Dashboard by clicking "Cancel Plan".
+- Cancellations take effect at the end of the current paid billing cycle. You retain full access to all features until the end of the paid term.
+- There are zero cancellation fees or early termination penalties.
+
+## 3. Prorated Refunds on Annual Plans
+- For Annual subscriptions cancelled within 30 days of renewal/purchase, customers may request a full refund or prorated refund for unused months.
+- Monthly subscriptions do not offer partial month prorated refunds, but remain active through the final day of the cycle.
+
+## 4. Account Downgrades & Data Retention
+- Upon cancellation expiration, your account downgrades to the Free Tier.
+- Ticket records and audit logs are securely archived for 12 months after downgrade and can be exported at any time.

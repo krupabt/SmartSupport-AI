@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ticket.ticket_number }} — {{ ticket.subject }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('main.customer_tickets') }}" class="text-decoration-none">My Tickets</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ ticket.ticket_number }}</li>
+    </ol>
+  </nav>
+
+  <!-- Ticket Header Card -->
+  <div class="saas-card p-4 mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-3 pb-3 border-bottom">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="fs-5 fw-bold text-primary font-monospace">{{ ticket.ticket_number }}</span>
+          {% if ticket.status == 'RESOLVED' or ticket.status == 'CLOSED' %}
+            <span class="status-badge badge-resolved"><i class="bi bi-check-circle"></i> {{ ticket.status.replace('_', ' ')|title }}</span>
+          {% elif ticket.status == 'ESCALATED' %}
+            <span class="status-badge badge-escalated"><i class="bi bi-exclamation-octagon"></i> Escalated</span>
+          {% elif ticket.status == 'IN_PROGRESS' or ticket.status == 'WAITING_FOR_CUSTOMER' %}
+            <span class="status-badge badge-in-progress"><i class="bi bi-arrow-repeat"></i> {{ ticket.status.replace('_', ' ')|title }}</span>
+          {% else %}
+            <span class="status-badge badge-open"><i class="bi bi-hourglass-split"></i> Open</span>
+          {% endif %}
+
+          {% if ticket.priority == 'CRITICAL' %}
+            <span class="badge bg-danger text-white">Critical Priority</span>
+          {% elif ticket.priority == 'HIGH' %}
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">High Priority</span>
+          {% elif ticket.priority == 'MEDIUM' %}
+            <span class="badge bg-warning-subtle text-dark border border-warning-subtle">Medium Priority</span>
+          {% else %}
+            <span class="badge bg-secondary-subtle text-secondary border">Low Priority</span>
+          {% endif %}
+        </div>
+        <h3 class="fw-bold text-dark mb-1">{{ ticket.subject }}</h3>
+        <div class="text-muted small">
+          Created on {{ ticket.created_at.strftime('%d %B %Y at %I:%M %p') }} &bull; Last updated {{ ticket.updated_at.strftime('%d %B %Y, %I:%M %p') }}
+        </div>
+      </div>
+      <div class="text-md-end d-flex flex-wrap gap-2 justify-content-md-end">
+        {% if ticket.status in ['RESOLVED', 'CLOSED'] %}
+          <button type="button" class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#reopenModal">
+            <i class="bi bi-arrow-clockwise me-1"></i> Reopen Ticket
+          </button>
+        {% elif ticket.status != 'ESCALATED' %}
+          <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#contactSupportModal">
+            <i class="bi bi-headset me-1"></i> Request Human Agent
+          </button>
+        {% endif %}
+        <a href="{{ url_for('main.customer_tickets') }}" class="btn btn-secondary-custom btn-sm">
+          <i class="bi bi-arrow-left me-1"></i> Back to Tickets
+        </a>
+      </div>
+    </div>
+
+    <!-- Key Attributes Grid -->
+    <div class="row g-3 pt-3">
+      <div class="col-6 col-md-3">
+        <span class="text-muted small d-block">Product / Service:</span>
+        <strong class="text-dark">{{ ticket.product_service }}</strong>
+      </div>
+      <div class="col-6 col-md-3">
+        <span class="text-muted small d-block">Category:</span>
+        <span class="badge bg-light text-dark border">{{ ticket.category }}</span>
+      </div>
+      <div class="col-6 col-md-3">
+        <span class="text-muted small d-block">Reference ID:</span>
+        <strong class="text-dark">{{ ticket.reference_id or 'N/A' }}</strong>
+      </div>
+      <div class="col-6 col-md-3">
+        <span class="text-muted small d-block">Assigned Support:</span>
+        <strong class="text-dark">{{ ticket.assigned_team }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Main Column: Resolution & Conversation Timeline -->
+    <div class="col-lg-8">
+      <!-- Grounded AI Resolution (Phase 4 RAG) -->
+      {% if ticket.rag_resolution %}
+        <div class="saas-card p-4 mb-4 border-primary-subtle shadow-sm">
+          <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+            <div class="d-flex align-items-center gap-2">
+              <span class="p-2 rounded-circle bg-primary-subtle text-primary">
+                <i class="bi bi-robot fs-5"></i>
+              </span>
+              <div>
+                <h5 class="fw-bold text-dark mb-0">AI Assistant Resolution</h5>
+                <span class="text-muted small">Grounded in verified company policies and knowledge base</span>
+              </div>
+            </div>
+            <div>
+              {% if ticket.rag_resolution.status == 'COMPLETED' %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                  <i class="bi bi-shield-check me-1"></i> Policy Grounded
+                </span>
+              {% elif ticket.rag_resolution.status == 'NO_RELEVANT_CONTEXT' %}
+                <span class="badge bg-warning-subtle text-dark border border-warning-subtle px-2 py-1">
+                  <i class="bi bi-headset me-1"></i> Escalated to Support
+                </span>
+              {% elif ticket.rag_resolution.status == 'UNAVAILABLE' %}
+                <span class="badge bg-secondary-subtle text-secondary border px-2 py-1">Unavailable</span>
+              {% else %}
+                <span class="badge bg-danger-subtle text-danger border px-2 py-1">{{ ticket.rag_resolution.status|title }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Answer Body -->
+          <div class="p-3 bg-light rounded-3 border mb-3">
+            <p class="mb-0 text-dark" style="white-space: pre-wrap; line-height: 1.6;">{{ ticket.rag_resolution.answer }}</p>
+          </div>
+
+          <!-- Source Citations (Grounded Policy References) -->
+          {% if ticket.rag_resolution.sources %}
+            <div class="mb-3">
+              <span class="text-muted small fw-bold text-uppercase d-block mb-2">
+                <i class="bi bi-journal-bookmark me-1 text-primary"></i> Verified Sources Consulted:
+              </span>
+              <div class="d-flex flex-column gap-2">
+                {% for src in ticket.rag_resolution.sources %}
+                  <div class="border rounded p-2 bg-white small">
+                    <div class="d-flex align-items-center justify-content-between">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-text text-primary"></i>
+                        <strong class="text-dark">{{ src.source_title }}</strong>
+                        <span class="badge bg-light text-muted border font-monospace">{{ src.filename }}</span>
+                        {% if src.page_number %}
+                          <span class="badge bg-secondary-subtle text-secondary border">Page {{ src.page_number }}</span>
+                        {% endif %}
+                      </div>
+                      {% if src.similarity_score %}
+                        <span class="text-muted font-monospace small">Match: {{ (src.similarity_score * 100)|int }}%</span>
+                      {% endif %}
+                    </div>
+                    {% if src.excerpt %}
+                      <div class="text-muted mt-1 ps-4 fst-italic border-start border-2 border-primary-subtle ms-1 py-1">
+                        "{{ src.excerpt }}"
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          <div class="d-flex align-items-center justify-content-between border-top pt-2 mt-3 text-muted small">
+            <span>
+              {% if ticket.rag_resolution.confidence %}
+                Confidence: <strong class="text-dark">{{ (ticket.rag_resolution.confidence * 100)|int }}%</strong> &bull;
+              {% endif %}
+              Resolved on {{ ticket.rag_resolution.created_at.strftime('%d %b %Y, %I:%M %p') }}
+            </span>
+            <form method="POST" action="{{ url_for('main.customer_ticket_resolve', ticket_number=ticket.ticket_number) }}" class="m-0">
+              <button type="submit" class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size: 0.75rem;">
+                <i class="bi bi-arrow-clockwise me-1"></i> Refresh AI Resolution
+              </button>
+            </form>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="saas-card p-4 mb-4">
+        <h5 class="fw-bold text-dark mb-4 border-bottom pb-2">
+          <i class="bi bi-chat-left-text me-2 text-primary"></i> Conversation History
+        </h5>
+
+        <div class="ticket-timeline">
+          {% for msg in messages %}
+            {% if msg.sender_type == 'SYSTEM' %}
+              <!-- System Log Bubble -->
+              <div class="system-timeline-item text-center my-3">
+                <span class="badge bg-light text-muted border px-3 py-2 fw-normal small">
+                  <i class="bi bi-info-circle me-1 text-primary"></i>
+                  <strong>System:</strong> {{ msg.message }}
+                  <span class="ms-2 opacity-75">{{ msg.created_at.strftime('%d %b, %I:%M %p') }}</span>
+                </span>
+              </div>
+            {% elif msg.sender_type == 'CUSTOMER' %}
+              <!-- Customer Message Bubble -->
+              <div class="chat-bubble customer-bubble mb-3">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                  <strong class="text-primary small"><i class="bi bi-person me-1"></i> {{ msg.sender_name }} (You)</strong>
+                  <small class="text-muted">{{ msg.created_at.strftime('%d %b %Y, %I:%M %p') }}</small>
+                </div>
+                <div class="message-text text-dark">
+                  {{ msg.message }}
+                </div>
+              </div>
+            {% else %}
+              <!-- Support Message Bubble -->
+              <div class="chat-bubble support-bubble mb-3">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                  <strong class="text-success small"><i class="bi bi-headset me-1"></i> Support Staff ({{ msg.sender_name }})</strong>
+                  <small class="text-muted">{{ msg.created_at.strftime('%d %b %Y, %I:%M %p') }}</small>
+                </div>
+                <div class="message-text text-dark">
+                  {{ msg.message }}
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Add Reply Box -->
+      <div class="saas-card p-4">
+        <h5 class="fw-bold text-dark mb-3">
+          <i class="bi bi-reply me-1 text-primary"></i> Add a Reply
+        </h5>
+
+        {% if ticket.status == 'CLOSED' %}
+          <div class="alert alert-secondary mb-0">
+            <i class="bi bi-lock-fill me-2"></i> This ticket is closed. No further replies can be added. If you need assistance with a new matter, please <a href="{{ url_for('main.submit_complaint') }}" class="alert-link">submit a new complaint</a>.
+          </div>
+        {% else %}
+          {% if ticket.status == 'RESOLVED' %}
+            <div class="alert alert-info py-2 small mb-3">
+              <i class="bi bi-info-circle me-1"></i> Note: Posting a reply to a resolved ticket will automatically reopen it for support review.
+            </div>
+          {% endif %}
+          <form method="POST" action="{{ url_for('main.customer_ticket_detail', ticket_number=ticket.ticket_number) }}">
+            <div class="mb-3">
+              <textarea class="form-control" name="message" rows="4" placeholder="Type your response or additional information here..." required></textarea>
+            </div>
+            <div class="text-end">
+              <button type="submit" class="btn btn-primary-custom">
+                <i class="bi bi-send me-1"></i> Send Reply
+              </button>
+            </div>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Ticket Summary & AI Insights Card -->
+    <div class="col-lg-4">
+      <!-- AI Triage Insights -->
+      {% if ticket.ai_analysis %}
+        <div class="saas-card p-4 mb-4 border-primary-subtle bg-white">
+          <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+            <h6 class="fw-bold text-dark mb-0">
+              <i class="bi bi-stars text-primary me-1"></i> AI Complaint Analysis
+            </h6>
+            {% if ticket.ai_analysis.status == 'COMPLETED' %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check2"></i> Analyzed</span>
+            {% elif ticket.ai_analysis.status == 'UNAVAILABLE' %}
+              <span class="badge bg-secondary-subtle text-secondary border">Unavailable</span>
+            {% else %}
+              <span class="badge bg-warning-subtle text-dark border">{{ ticket.ai_analysis.status|title }}</span>
+            {% endif %}
+          </div>
+
+          {% if ticket.ai_analysis.status == 'COMPLETED' %}
+            <div class="mb-3">
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-muted">Detected Category:</span>
+                <span class="badge bg-primary-subtle text-primary">{{ ticket.ai_analysis.category }}</span>
+              </div>
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-muted">Assessed Sentiment:</span>
+                <span class="badge bg-light text-dark border">{{ ticket.ai_analysis.sentiment }}</span>
+              </div>
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-muted">Calculated Priority:</span>
+                <strong class="text-dark">{{ ticket.ai_analysis.priority }}</strong>
+              </div>
+              {% if ticket.ai_analysis.confidence %}
+                <div class="d-flex justify-content-between small mb-2">
+                  <span class="text-muted">Confidence:</span>
+                  <span class="text-muted font-monospace">{{ (ticket.ai_analysis.confidence * 100)|int }}%</span>
+                </div>
+              {% endif %}
+            </div>
+            
+            {% if ticket.ai_analysis.reason %}
+              <div class="bg-light p-2 rounded border small text-secondary">
+                <i class="bi bi-info-circle me-1 text-primary"></i> {{ ticket.ai_analysis.reason }}
+              </div>
+            {% endif %}
+          {% elif ticket.ai_analysis.status == 'UNAVAILABLE' %}
+            <p class="small text-muted mb-0">
+              <i class="bi bi-info-circle me-1"></i> AI analysis is temporarily unavailable for this ticket.
+            </p>
+          {% else %}
+            <p class="small text-muted mb-0">
+              Analysis status: {{ ticket.ai_analysis.status }}
+            </p>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <div class="saas-card p-4">
+        <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">Ticket Summary</h6>
+        
+        <div class="mb-3">
+          <span class="text-muted small d-block">Original Description:</span>
+          <p class="text-secondary small bg-light p-3 rounded border mb-0" style="white-space: pre-wrap;">{{ ticket.description }}</p>
+        </div>
+
+        <div class="border-top pt-3">
+          <div class="d-flex justify-content-between small mb-2">
+            <span class="text-muted">Status:</span>
+            <strong class="text-dark">{{ ticket.status.replace('_', ' ')|title }}</strong>
+          </div>
+          <div class="d-flex justify-content-between small mb-2">
+            <span class="text-muted">Priority:</span>
+            <strong class="text-dark">{{ ticket.priority|title }}</strong>
+          </div>
+          <div class="d-flex justify-content-between small mb-2">
+            <span class="text-muted">Sentiment:</span>
+            <strong class="text-dark">{{ ticket.sentiment }}</strong>
+          </div>
+          <div class="d-flex justify-content-between small">
+            <span class="text-muted">Created:</span>
+            <span class="text-dark">{{ ticket.created_at.strftime('%d %b %Y') }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reopen Ticket Modal -->
+<div class="modal fade" id="reopenModal" tabindex="-1" aria-labelledby="reopenModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold text-dark" id="reopenModalLabel">
+          <i class="bi bi-arrow-clockwise text-warning me-2"></i> Reopen Ticket
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST" action="{{ url_for('main.customer_ticket_reopen', ticket_number=ticket.ticket_number) }}">
+        <div class="modal-body p-4">
+          <p class="text-secondary small">
+            If your issue has recurred or needs further investigation by our support team, you can reopen this ticket to 'In Progress'.
+          </p>
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark small">Reason for reopening (optional):</label>
+            <textarea class="form-control" name="reason" rows="3" placeholder="Please provide additional details on why you are reopening this ticket..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary-custom btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-warning btn-sm fw-semibold">
+            <i class="bi bi-arrow-clockwise me-1"></i> Reopen Ticket
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Request Human Support Modal -->
+<div class="modal fade" id="contactSupportModal" tabindex="-1" aria-labelledby="contactSupportModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold text-dark" id="contactSupportModalLabel">
+          <i class="bi bi-headset text-primary me-2"></i> Request Human Agent
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST" action="{{ url_for('main.customer_contact_support', ticket_number=ticket.ticket_number) }}">
+        <div class="modal-body p-4">
+          <p class="text-secondary small">
+            Prefer to speak directly with a human specialist? We will immediately escalate this ticket to our dedicated support queue.
+          </p>
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark small">Why do you need human agent assistance? (optional):</label>
+            <textarea class="form-control" name="reason" rows="3" placeholder="Describe any specific requirements or why automated resolution wasn't sufficient..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary-custom btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary-custom btn-sm">
+            <i class="bi bi-send-check me-1"></i> Connect to Human Agent
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

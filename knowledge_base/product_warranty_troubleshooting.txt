@@ -1,0 +1,20 @@
+# Product Warranty and Technical Troubleshooting
+
+## 1. Warranty Coverage
+- All hardware devices include a 1-Year Limited Manufacturer Warranty covering defects in materials and workmanship under normal use.
+- The warranty period begins on the confirmed delivery date.
+- Accidental damage, water damage, unauthorized third-party modifications, and electrical surges are not covered under the standard warranty.
+
+## 2. Dead-on-Arrival (DOA) Claims
+- If a product fails to power on or operate upon unboxing, it qualifies as DOA.
+- DOA claims filed within 30 days of delivery receive an immediate expedited replacement unit dispatched with prepaid return shipping for the defective device.
+
+## 3. RMA Replacement Process
+1. Contact Technical Support with your Serial Number and description of the hardware fault.
+2. A support engineer will initiate diagnostic verification steps.
+3. If confirmed defective, an RMA (Return Merchandise Authorization) number and prepaid shipping label will be issued.
+4. Replacement devices are dispatched within 2 business days of receipt at our repair center.
+
+## 4. Basic Hardware Troubleshooting Steps
+- **Device Not Powering On:** Verify power adapter is firmly connected, test with an alternate wall socket, and perform a 30-second hard power reset by holding the power button.
+- **Connectivity / Wi-Fi Loss:** Reboot the gateway router, ensure firmware version is up to date, and hold the reset button for 10 seconds to restore factory network defaults.

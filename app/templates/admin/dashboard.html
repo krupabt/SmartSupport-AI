@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+
+{% block title %}Support Operations Dashboard — SmartSupport AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+  <!-- Admin Header -->
+  <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between pb-4 mb-4 border-bottom gap-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <h2 class="fw-bold text-dark mb-0">Support &amp; Operations Center</h2>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ user_role|capitalize }} Access</span>
+      </div>
+      <p class="text-muted mb-0">Manage incoming complaints, monitor SLA compliance, inspect team assignments, and resolve customer tickets.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <!-- Date Range Filter -->
+      <form method="GET" action="{{ url_for('main.admin_dashboard') }}" class="d-flex align-items-center gap-1">
+        <select class="form-select form-select-sm" name="range" onchange="this.form.submit()">
+          <option value="all" {% if date_range == 'all' or not date_range %}selected{% endif %}>All Time</option>
+          <option value="today" {% if date_range == 'today' %}selected{% endif %}>Today</option>
+          <option value="7d" {% if date_range == '7d' %}selected{% endif %}>Past 7 Days</option>
+          <option value="30d" {% if date_range == '30d' %}selected{% endif %}>Past 30 Days</option>
+        </select>
+      </form>
+      <a href="{{ url_for('main.admin_knowledge_base') }}" class="btn btn-secondary-custom btn-sm shadow-sm">
+        <i class="bi bi-book me-1"></i> Knowledge Base
+      </a>
+      <a href="{{ url_for('main.admin_tickets') }}" class="btn btn-primary-custom btn-sm shadow-sm">
+        <i class="bi bi-ticket-detailed me-1"></i> View Ticket Queue
+      </a>
+    </div>
+  </div>
+
+  <!-- Operational KPI Metrics from SQLite -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="saas-card stat-card p-3">
+        <div class="stat-label">Total Tickets</div>
+        <div class="stat-value mt-1">{{ total_tickets }}</div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="saas-card stat-card open p-3">
+        <div class="stat-label">Open / New</div>
+        <div class="stat-value mt-1 text-warning">{{ open_tickets }}</div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="saas-card stat-card in-progress p-3">
+        <div class="stat-label">In Progress</div>
+        <div class="stat-value mt-1 text-primary">{{ in_progress_tickets }}</div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="saas-card stat-card escalated p-3">
+        <div class="stat-label">Escalated</div>
+        <div class="stat-value mt-1 text-danger">{{ escalated_tickets }}</div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="saas-card stat-card resolved p-3">
+        <div class="stat-label">Resolved</div>
+        <div class="stat-value mt-1 text-success">{{ resolved_tickets }}</div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="saas-card stat-card escalated p-3">
+        <div class="stat-label">Critical</div>
+        <div class="stat-value mt-1 text-danger">{{ critical_tickets }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLA & Performance Row -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="saas-card p-3 bg-white">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-muted small d-block">Avg 1st Response</span>
+            <strong class="fs-5 text-dark">
+              {% if avg_first_response_hours is not none %}
+                {% if avg_first_response_hours < 1 %}
+                  {{ (avg_first_response_hours * 60)|round|int }}m
+                {% else %}
+                  {{ avg_first_response_hours }}h
+                {% endif %}
+              {% else %}
+                --
+              {% endif %}
+            </strong>
+          </div>
+          <span class="p-2 rounded-circle bg-primary-subtle text-primary"><i class="bi bi-stopwatch fs-5"></i></span>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="saas-card p-3 bg-white">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-muted small d-block">Avg Resolution Time</span>
+            <strong class="fs-5 text-dark">
+              {% if avg_resolution_hours is not none %}
+                {{ avg_resolution_hours }}h
+              {% else %}
+                --
+              {% endif %}
+            </strong>
+          </div>
+          <span class="p-2 rounded-circle bg-success-subtle text-success"><i class="bi bi-check-all fs-5"></i></span>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="saas-card p-3 bg-white">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-muted small d-block">AI Resolution Rate</span>
+            <strong class="fs-5 text-primary">
+              {% if ai_resolution_rate is not none %}{{ ai_resolution_rate }}%{% else %}0%{% endif %}
+            </strong>
+          </div>
+          <span class="p-2 rounded-circle bg-info-subtle text-info"><i class="bi bi-robot fs-5"></i></span>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="saas-card p-3 bg-white">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-muted small d-block">Escalation Rate</span>
+            <strong class="fs-5 text-danger">
+              {% if escalation_rate is not none %}{{ escalation_rate }}%{% else %}0%{% endif %}
+            </strong>
+          </div>
+          <span class="p-2 rounded-circle bg-danger-subtle text-danger"><i class="bi bi-arrow-up-right-circle fs-5"></i></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real AI Analytics & Operational Breakdown Grid -->
+  <div class="row g-4 mb-4">
+    <!-- Category Distribution -->
+    <div class="col-md-4">
+      <div class="saas-card p-4 h-100">
+        <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">
+          <i class="bi bi-pie-chart-fill text-primary me-2"></i> Category Distribution
+        </h6>
+        {% if category_distribution %}
+          <div class="d-flex flex-column gap-2">
+            {% for cat, count in category_distribution.items() %}
+              <div>
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-dark fw-semibold">{{ cat }}</span>
+                  <span class="text-muted">{{ count }} ({{ ((count / total_tickets) * 100)|round|int }}%)</span>
+                </div>
+                <div class="progress" style="height: 6px;">
+                  <div class="progress-bar bg-primary" role="progressbar" style="width: {{ ((count / total_tickets) * 100)|round|int }}%"></div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted small mb-0">No complaints categorized yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Sentiment Breakdown -->
+    <div class="col-md-4">
+      <div class="saas-card p-4 h-100">
+        <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">
+          <i class="bi bi-emoji-smile-fill text-warning me-2"></i> Sentiment Analysis
+        </h6>
+        {% if sentiment_distribution %}
+          <div class="d-flex flex-column gap-2">
+            {% for sent, count in sentiment_distribution.items() %}
+              {% set bar_color = 'bg-secondary' %}
+              {% if sent == 'Positive' %}{% set bar_color = 'bg-success' %}
+              {% elif sent == 'Negative' %}{% set bar_color = 'bg-danger' %}
+              {% elif sent == 'Very Negative' %}{% set bar_color = 'bg-dark' %}
+              {% elif sent == 'Neutral' %}{% set bar_color = 'bg-info' %}
+              {% endif %}
+              <div>
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-dark fw-semibold">{{ sent }}</span>
+                  <span class="text-muted">{{ count }} ({{ ((count / total_tickets) * 100)|round|int }}%)</span>
+                </div>
+                <div class="progress" style="height: 6px;">
+                  <div class="progress-bar {{ bar_color }}" role="progressbar" style="width: {{ ((count / total_tickets) * 100)|round|int }}%"></div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted small mb-0">No sentiment data available.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Priority Matrix -->
+    <div class="col-md-4">
+      <div class="saas-card p-4 h-100">
+        <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">
+          <i class="bi bi-bar-chart-line-fill text-danger me-2"></i> Priority Matrix
+        </h6>
+        {% if priority_distribution %}
+          <div class="d-flex flex-column gap-2">
+            {% for prio, count in priority_distribution.items() %}
+              {% set p_bar = 'bg-secondary' %}
+              {% if prio == 'CRITICAL' or prio == 'Critical' %}{% set p_bar = 'bg-danger' %}
+              {% elif prio == 'HIGH' or prio == 'High' %}{% set p_bar = 'bg-warning text-dark' %}
+              {% elif prio == 'MEDIUM' or prio == 'Medium' %}{% set p_bar = 'bg-primary' %}
+              {% elif prio == 'LOW' or prio == 'Low' %}{% set p_bar = 'bg-info' %}
+              {% endif %}
+              <div>
+                <div class="d-flex justify-content-between small mb-1">
+                  <span class="text-dark fw-semibold">{{ prio|title }}</span>
+                  <span class="text-muted">{{ count }} ({{ ((count / total_tickets) * 100)|round|int }}%)</span>
+                </div>
+                <div class="progress" style="height: 6px;">
+                  <div class="progress-bar {{ p_bar }}" role="progressbar" style="width: {{ ((count / total_tickets) * 100)|round|int }}%"></div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted small mb-0">No priority distribution data.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- Ticket Overview & Queue Activity -->
+    <div class="col-lg-8">
+      <div class="saas-card p-4 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+          <h5 class="fw-bold text-dark mb-0">Recent Complaint Activity</h5>
+          {% if recent_tickets %}
+            <a href="{{ url_for('main.admin_tickets') }}" class="text-primary small text-decoration-none fw-semibold">View All Queue ({{ total_tickets }})</a>
+          {% endif %}
+        </div>
+
+        {% if recent_tickets %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light text-muted small text-uppercase">
+                <tr>
+                  <th>Ticket</th>
+                  <th>Customer</th>
+                  <th>Subject</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Assigned</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for t in recent_tickets %}
+                  <tr>
+                    <td>
+                      <a href="{{ url_for('main.admin_ticket_detail', ticket_number=t.ticket_number) }}" class="fw-bold font-monospace text-primary text-decoration-none">
+                        {{ t.ticket_number }}
+                      </a>
+                    </td>
+                    <td>
+                      <div class="fw-semibold text-dark small">{{ t.user.name }}</div>
+                    </td>
+                    <td class="small text-dark fw-semibold text-truncate" style="max-width: 180px;">{{ t.subject }}</td>
+                    <td>
+                      {% if t.priority == 'CRITICAL' %}
+                        <span class="badge bg-danger text-white">Critical</span>
+                      {% elif t.priority == 'HIGH' %}
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">High</span>
+                      {% elif t.priority == 'MEDIUM' %}
+                        <span class="badge bg-warning-subtle text-dark border border-warning-subtle">Medium</span>
+                      {% else %}
+                        <span class="badge bg-secondary-subtle text-secondary border">Low</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if t.status == 'RESOLVED' or t.status == 'CLOSED' %}
+                        <span class="status-badge badge-resolved"><i class="bi bi-check-circle"></i> {{ t.status.replace('_', ' ')|title }}</span>
+                      {% elif t.status == 'ESCALATED' %}
+                        <span class="status-badge badge-escalated"><i class="bi bi-exclamation-octagon"></i> Escalated</span>
+                      {% elif t.status == 'IN_PROGRESS' or t.status == 'WAITING_FOR_CUSTOMER' %}
+                        <span class="status-badge badge-in-progress"><i class="bi bi-arrow-repeat"></i> {{ t.status.replace('_', ' ')|title }}</span>
+                      {% else %}
+                        <span class="status-badge badge-open"><i class="bi bi-hourglass-split"></i> Open</span>
+                      {% endif %}
+                    </td>
+                    <td><span class="badge bg-light text-secondary border small">{{ t.assigned_team }}</span></td>
+                    <td class="text-end">
+                      <a href="{{ url_for('main.admin_ticket_detail', ticket_number=t.ticket_number) }}" class="btn btn-outline-primary btn-sm">
+                        Manage
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="empty-state py-5">
+            <div class="empty-state-icon">
+              <i class="bi bi-inbox"></i>
+            </div>
+            <div class="empty-state-title">No recent activity</div>
+            <p class="empty-state-text">
+              No complaint tickets have been submitted yet. Incoming customer complaints and ticket escalations will stream here.
+            </p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Quick Actions & Pipeline Status -->
+    <div class="col-lg-4">
+      <div class="saas-card p-4 h-100">
+        <h5 class="fw-bold text-dark mb-3 border-bottom pb-3">System &amp; Pipeline Status</h5>
+        
+        <div class="mb-3">
+          <div class="d-flex justify-content-between small mb-1">
+            <span class="text-muted">SQLite Database:</span>
+            <span class="badge bg-success-subtle text-success">Active &amp; Connected</span>
+          </div>
+          <div class="d-flex justify-content-between small mb-1">
+            <span class="text-muted">Ticket Management:</span>
+            <span class="badge bg-success-subtle text-success">Phase 2 Active</span>
+          </div>
+          <div class="d-flex justify-content-between small mb-1">
+            <span class="text-muted">Authentication &amp; RBAC:</span>
+            <span class="badge bg-success-subtle text-success">Active</span>
+          </div>
+          <div class="d-flex justify-content-between small mb-1">
+            <span class="text-muted">RAG Vector Index:</span>
+            <span class="badge bg-secondary-subtle text-secondary">Ready for Phase 3</span>
+          </div>
+          <div class="d-flex justify-content-between small">
+            <span class="text-muted">AI LLM Pipeline:</span>
+            <span class="badge bg-secondary-subtle text-secondary">Ready for Phase 3</span>
+          </div>
+        </div>
+
+        <hr>
+
+        <h6 class="fw-bold text-dark mb-2">Support Navigation</h6>
+        <div class="d-grid gap-2">
+          <a href="{{ url_for('main.admin_tickets') }}" class="btn btn-outline-secondary btn-sm text-start">
+            <i class="bi bi-funnel me-2"></i> Filter &amp; Search Ticket Queue
+          </a>
+          <a href="{{ url_for('main.admin_knowledge_base') }}" class="btn btn-outline-secondary btn-sm text-start">
+            <i class="bi bi-book me-2"></i> Knowledge Base Management
+          </a>
+          <a href="{{ url_for('api.health_check') }}" target="_blank" class="btn btn-outline-secondary btn-sm text-start">
+            <i class="bi bi-heart-pulse me-2"></i> Check System Health API
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

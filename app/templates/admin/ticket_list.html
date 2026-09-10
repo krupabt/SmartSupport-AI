@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Support Ticket Queue — SmartSupport AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+  <!-- Header -->
+  <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between pb-3 mb-4 border-bottom gap-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <h2 class="fw-bold text-dark mb-0">Support Ticket Queue</h2>
+        <span class="badge bg-primary text-white">{{ tickets|length }} Total</span>
+      </div>
+      <p class="text-muted mb-0">Monitor active customer complaints, prioritize critical issues, and assign support teams.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-secondary-custom">
+        <i class="bi bi-speedometer2 me-1"></i> Operations Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- Filter & Search Controls -->
+  <div class="saas-card p-3 mb-4">
+    <form method="GET" action="{{ url_for('main.admin_tickets') }}" class="row g-2 align-items-center">
+      <div class="col-md-3">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+          <input type="text" class="form-control border-start-0 ps-0" name="q" value="{{ search_query or '' }}" placeholder="Search tickets, customers, subject...">
+        </div>
+      </div>
+      <div class="col-6 col-md-2">
+        <select class="form-select" name="status">
+          <option value="">All Statuses</option>
+          {% for st in statuses %}
+            <option value="{{ st }}" {% if status_filter == st %}selected{% endif %}>{{ st.replace('_', ' ')|title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <select class="form-select" name="priority">
+          <option value="">All Priorities</option>
+          {% for pr in priorities %}
+            <option value="{{ pr }}" {% if priority_filter == pr %}selected{% endif %}>{{ pr|title }} Priority</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <select class="form-select" name="category">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+            <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <select class="form-select" name="sentiment">
+          <option value="">All Sentiments</option>
+          {% for sent in sentiments %}
+            <option value="{{ sent }}" {% if sentiment_filter == sent %}selected{% endif %}>{{ sent }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <select class="form-select" name="team">
+          <option value="">All Teams</option>
+          {% for tm in teams %}
+            <option value="{{ tm }}" {% if team_filter == tm %}selected{% endif %}>{{ tm }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-md-1 d-grid">
+        <button type="submit" class="btn btn-secondary-custom">Filter</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Ticket Table -->
+  <div class="saas-card p-0 overflow-hidden">
+    {% if tickets %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light text-muted small text-uppercase">
+            <tr>
+              <th class="ps-4">Ticket</th>
+              <th>Customer</th>
+              <th>Subject</th>
+              <th>Category</th>
+              <th>Sentiment</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Assigned Team</th>
+              <th>Created</th>
+              <th class="text-end pe-4">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in tickets %}
+              <tr>
+                <td class="ps-4">
+                  <a href="{{ url_for('main.admin_ticket_detail', ticket_number=t.ticket_number) }}" class="fw-bold font-monospace text-primary text-decoration-none">
+                    {{ t.ticket_number }}
+                  </a>
+                </td>
+                <td>
+                  <div class="fw-semibold text-dark">{{ t.user.name }}</div>
+                  <small class="text-muted">{{ t.user.email }}</small>
+                </td>
+                <td>
+                  <div class="fw-semibold text-dark text-truncate" style="max-width: 200px;">{{ t.subject }}</div>
+                  <small class="text-secondary">{{ t.product_service }}</small>
+                </td>
+                <td><span class="badge bg-light text-dark border">{{ t.category }}</span></td>
+                <td><span class="badge bg-light text-secondary border">{{ t.sentiment }}</span></td>
+                <td>
+                  {% if t.priority == 'CRITICAL' %}
+                    <span class="badge bg-danger text-white">Critical</span>
+                  {% elif t.priority == 'HIGH' %}
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">High</span>
+                  {% elif t.priority == 'MEDIUM' %}
+                    <span class="badge bg-warning-subtle text-dark border border-warning-subtle">Medium</span>
+                  {% else %}
+                    <span class="badge bg-secondary-subtle text-secondary border">Low</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if t.status == 'RESOLVED' or t.status == 'CLOSED' %}
+                    <span class="status-badge badge-resolved"><i class="bi bi-check-circle"></i> {{ t.status.replace('_', ' ')|title }}</span>
+                  {% elif t.status == 'ESCALATED' %}
+                    <span class="status-badge badge-escalated"><i class="bi bi-exclamation-octagon"></i> Escalated</span>
+                  {% elif t.status == 'IN_PROGRESS' or t.status == 'WAITING_FOR_CUSTOMER' %}
+                    <span class="status-badge badge-in-progress"><i class="bi bi-arrow-repeat"></i> {{ t.status.replace('_', ' ')|title }}</span>
+                  {% else %}
+                    <span class="status-badge badge-open"><i class="bi bi-hourglass-split"></i> Open</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="badge bg-light text-secondary border">{{ t.assigned_team }}</span>
+                </td>
+                <td class="small text-muted">{{ t.created_at.strftime('%d %b, %I:%M %p') }}</td>
+                <td class="text-end pe-4">
+                  <a href="{{ url_for('main.admin_ticket_detail', ticket_number=t.ticket_number) }}" class="btn btn-outline-primary btn-sm">
+                    Manage <i class="bi bi-arrow-right ms-1"></i>
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state py-5">
+        <div class="empty-state-icon"><i class="bi bi-inbox"></i></div>
+        <div class="empty-state-title">No tickets found</div>
+        <p class="empty-state-text">
+          No complaints match the filter criteria.
+        </p>
+        <a href="{{ url_for('main.admin_tickets') }}" class="btn btn-outline-secondary btn-sm">Reset Filters</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

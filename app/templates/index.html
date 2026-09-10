@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}SmartSupport AI — Next-Gen Complaint Resolution & Support Platform{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center">
+  <div class="container py-4">
+    <div class="hero-badge">
+      <i class="bi bi-stars"></i> Intelligent AI-Driven Complaint Automation
+    </div>
+    <h1 class="hero-title">
+      AI-Powered Customer Support &amp;<br class="d-none d-md-block"> Complaint Resolution
+    </h1>
+    <p class="hero-subtitle">
+      Empowering modern organizations to automatically classify customer complaints, calculate dynamic priorities, retrieve verified knowledge-base solutions via RAG, and streamline multi-team support workflows.
+    </p>
+    <div class="d-flex flex-wrap justify-content-center gap-3 mt-3">
+      <a href="{{ url_for('main.submit_complaint') }}" class="btn btn-primary-custom btn-lg px-4 shadow">
+        <i class="bi bi-pencil-square me-2"></i> Submit a Complaint
+      </a>
+      {% if not session.get('user_id') %}
+        <a href="{{ url_for('auth.login') }}" class="btn btn-secondary-custom btn-lg px-4">
+          <i class="bi bi-box-arrow-in-right me-2"></i> Customer Login
+        </a>
+      {% endif %}
+      <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-secondary-custom btn-lg px-4">
+        <i class="bi bi-speedometer2 me-2"></i> Support Dashboard
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section id="how-it-works" class="py-5 bg-white border-bottom">
+  <div class="container py-4">
+    <div class="text-center mb-5">
+      <span class="text-primary fw-bold text-uppercase small tracking-wide">Automated Workflow</span>
+      <h2 class="fw-bold mt-1 text-dark">How SmartSupport AI Works</h2>
+      <p class="text-muted mx-auto" style="max-width: 600px;">From submission to verified resolution in seconds with strict factual grounding.</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-3">
+        <div class="saas-card p-4 text-center h-100">
+          <div class="feature-icon-wrapper bg-primary text-white mx-auto">
+            <i class="bi bi-1-circle"></i>
+          </div>
+          <h5 class="fw-bold">1. Submission</h5>
+          <p class="text-muted small">Customer submits a complaint with product details and order reference.</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="saas-card p-4 text-center h-100">
+          <div class="feature-icon-wrapper bg-info text-white mx-auto">
+            <i class="bi bi-2-circle"></i>
+          </div>
+          <h5 class="fw-bold">2. AI Analysis</h5>
+          <p class="text-muted small">Automated classification, sentiment scoring, and multi-factor priority rating.</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="saas-card p-4 text-center h-100">
+          <div class="feature-icon-wrapper bg-success text-white mx-auto">
+            <i class="bi bi-3-circle"></i>
+          </div>
+          <h5 class="fw-bold">3. RAG Retrieval</h5>
+          <p class="text-muted small">Relevant policy chunks retrieved from FAISS to formulate grounded answers.</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="saas-card p-4 text-center h-100">
+          <div class="feature-icon-wrapper bg-warning text-white mx-auto">
+            <i class="bi bi-4-circle"></i>
+          </div>
+          <h5 class="fw-bold">4. Resolution &amp; Escalation</h5>
+          <p class="text-muted small">Instant verified resolution or automatic escalation to specialized support teams.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Key Features Section -->
+<section id="features" class="py-5">
+  <div class="container py-4">
+    <div class="text-center mb-5">
+      <span class="text-primary fw-bold text-uppercase small tracking-wide">Enterprise Capabilities</span>
+      <h2 class="fw-bold mt-1 text-dark">Engineered for Accuracy &amp; Efficiency</h2>
+      <p class="text-muted mx-auto" style="max-width: 600px;">A full-stack AI pipeline built to handle high complaint volumes without policy hallucination.</p>
+    </div>
+
+    <div class="row g-4">
+      <!-- Feature 1 -->
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box">
+          <div class="feature-icon-wrapper bg-primary-subtle text-primary">
+            <i class="bi bi-robot"></i>
+          </div>
+          <h5 class="fw-bold text-dark">AI-Powered Support</h5>
+          <p class="text-muted small">
+            Categorizes complaints across Billing, Technical, Product, Delivery, and Security with quantifiable confidence metrics.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box">
+          <div class="feature-icon-wrapper bg-success-subtle text-success">
+            <i class="bi bi-file-earmark-check"></i>
+          </div>
+          <h5 class="fw-bold text-dark">Knowledge-Grounded Responses</h5>
+          <p class="text-muted small">
+            Retrieval-Augmented Generation (RAG) ensures all solutions reference exact company documentation chunks and citations.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box">
+          <div class="feature-icon-wrapper bg-danger-subtle text-danger">
+            <i class="bi bi-lightning-charge"></i>
+          </div>
+          <h5 class="fw-bold text-dark">Multi-Factor Priority Matrix</h5>
+          <p class="text-muted small">
+            Calculates priority based on sentiment polarity, financial impact, urgency keywords, and customer history.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box">
+          <div class="feature-icon-wrapper bg-warning-subtle text-warning">
+            <i class="bi bi-arrow-up-right-circle"></i>
+          </div>
+          <h5 class="fw-bold text-dark">Automatic Ticket Escalation</h5>
+          <p class="text-muted small">
+            Routes unresolved, critical, or high-sentiment complaints directly to designated support departments with audit logs.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box">
+          <div class="feature-icon-wrapper bg-info-subtle text-info">
+            <i class="bi bi-kanban"></i>
+          </div>
+          <h5 class="fw-bold text-dark">Ticket Management Hub</h5>
+          <p class="text-muted small">
+            Real-time status transitions, internal agent collaboration notes, and complete customer conversation history.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 6 -->
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-box">
+          <div class="feature-icon-wrapper bg-secondary-subtle text-secondary">
+            <i class="bi bi-graph-up"></i>
+          </div>
+          <h5 class="fw-bold text-dark">Support Team Dashboard</h5>
+          <p class="text-muted small">
+            Operational visibility with category distribution metrics, sentiment breakdowns, and average resolution times.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5 bg-dark text-white text-center">
+  <div class="container py-4">
+    <h2 class="fw-bold mb-3">Ready to Experience Grounded AI Resolution?</h2>
+    <p class="text-secondary mx-auto mb-4" style="max-width: 600px;">
+      Explore the customer tracking interface or log in to the administrative support operations dashboard.
+    </p>
+    <div class="d-flex justify-content-center gap-3">
+      <a href="{{ url_for('auth.register') }}" class="btn btn-primary-custom btn-lg">Get Started</a>
+      <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">Account Login</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

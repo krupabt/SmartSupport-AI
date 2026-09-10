@@ -1,0 +1,36 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Environment secrets
+.env
+
+# SQLite Database & Instance files
+instance/
+*.db
+*.sqlite3
+
+# Vector Store indices
+vector_store/
+*.bin
+*.faiss
+*.pkl
+
+# Logs & scratch
+*.log
+scratch/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE files
+.vscode/
+.idea/
+*.swp

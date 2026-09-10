@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}My Support Tickets — SmartSupport AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Header -->
+  <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between pb-3 mb-4 border-bottom gap-3">
+    <div>
+      <h2 class="fw-bold text-dark mb-1">My Support Tickets</h2>
+      <p class="text-muted mb-0">Track status, conversation updates, and resolutions for your submitted complaints.</p>
+    </div>
+    <div>
+      <a href="{{ url_for('main.submit_complaint') }}" class="btn btn-primary-custom shadow-sm">
+        <i class="bi bi-plus-lg me-1"></i> Submit New Complaint
+      </a>
+    </div>
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="saas-card p-3 mb-4">
+    <form method="GET" action="{{ url_for('main.customer_tickets') }}" class="row g-2 align-items-center">
+      <div class="col-md-5">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+          <input type="text" class="form-control border-start-0 ps-0" name="q" value="{{ search_query or '' }}" placeholder="Search by ticket #, subject, product...">
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <select class="form-select" name="status">
+          <option value="">All Statuses</option>
+          {% for st in statuses %}
+            <option value="{{ st }}" {% if status_filter == st %}selected{% endif %}>{{ st.replace('_', ' ')|title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <select class="form-select" name="priority">
+          <option value="">All Priorities</option>
+          {% for pr in priorities %}
+            <option value="{{ pr }}" {% if priority_filter == pr %}selected{% endif %}>{{ pr|title }} Priority</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-md-1 d-grid">
+        <button type="submit" class="btn btn-secondary-custom">Filter</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Tickets Table / List -->
+  <div class="saas-card p-0 overflow-hidden">
+    {% if tickets %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light text-muted small text-uppercase">
+            <tr>
+              <th class="ps-4">Ticket ID</th>
+              <th>Subject</th>
+              <th>Product / Service</th>
+              <th>Category</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Last Updated</th>
+              <th class="text-end pe-4">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in tickets %}
+              <tr>
+                <td class="ps-4">
+                  <a href="{{ url_for('main.customer_ticket_detail', ticket_number=t.ticket_number) }}" class="fw-bold text-primary text-decoration-none">
+                    {{ t.ticket_number }}
+                  </a>
+                </td>
+                <td>
+                  <div class="fw-semibold text-dark">{{ t.subject }}</div>
+                  {% if t.reference_id %}
+                    <small class="text-muted">Ref: {{ t.reference_id }}</small>
+                  {% endif %}
+                </td>
+                <td><span class="text-secondary small">{{ t.product_service }}</span></td>
+                <td><span class="badge bg-light text-secondary border">{{ t.category }}</span></td>
+                <td>
+                  {% if t.priority == 'CRITICAL' %}
+                    <span class="badge bg-danger text-white">Critical</span>
+                  {% elif t.priority == 'HIGH' %}
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">High</span>
+                  {% elif t.priority == 'MEDIUM' %}
+                    <span class="badge bg-warning-subtle text-dark border border-warning-subtle">Medium</span>
+                  {% else %}
+                    <span class="badge bg-secondary-subtle text-secondary border">Low</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if t.status == 'RESOLVED' or t.status == 'CLOSED' %}
+                    <span class="status-badge badge-resolved"><i class="bi bi-check-circle"></i> {{ t.status.replace('_', ' ')|title }}</span>
+                  {% elif t.status == 'ESCALATED' %}
+                    <span class="status-badge badge-escalated"><i class="bi bi-exclamation-octagon"></i> Escalated</span>
+                  {% elif t.status == 'IN_PROGRESS' or t.status == 'WAITING_FOR_CUSTOMER' %}
+                    <span class="status-badge badge-in-progress"><i class="bi bi-arrow-repeat"></i> {{ t.status.replace('_', ' ')|title }}</span>
+                  {% else %}
+                    <span class="status-badge badge-open"><i class="bi bi-hourglass-split"></i> Open</span>
+                  {% endif %}
+                </td>
+                <td class="small text-muted">{{ t.updated_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+                <td class="text-end pe-4">
+                  <a href="{{ url_for('main.customer_ticket_detail', ticket_number=t.ticket_number) }}" class="btn btn-outline-primary btn-sm">
+                    View <i class="bi bi-arrow-right ms-1"></i>
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state py-5">
+        <div class="empty-state-icon"><i class="bi bi-inbox"></i></div>
+        <div class="empty-state-title">No matching tickets</div>
+        <p class="empty-state-text">
+          {% if search_query or status_filter or priority_filter %}
+            No tickets match your active filter criteria. Try resetting the search or filter options.
+          {% else %}
+            You haven't submitted any support complaints yet.
+          {% endif %}
+        </p>
+        {% if search_query or status_filter or priority_filter %}
+          <a href="{{ url_for('main.customer_tickets') }}" class="btn btn-outline-secondary btn-sm">Clear Filters</a>
+        {% else %}
+          <a href="{{ url_for('main.submit_complaint') }}" class="btn btn-primary-custom btn-sm">
+            <i class="bi bi-pencil-square me-1"></i> Submit Complaint
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

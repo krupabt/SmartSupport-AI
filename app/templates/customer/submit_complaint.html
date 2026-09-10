@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Support Complaint — SmartSupport AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{{ url_for('main.dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Submit Complaint</li>
+        </ol>
+      </nav>
+
+      <div class="saas-card p-4 p-md-5">
+        <div class="d-flex align-items-center gap-3 pb-3 mb-4 border-bottom">
+          <div class="brand-icon" style="width: 44px; height: 44px; font-size: 1.3rem;">
+            <i class="bi bi-pencil-square"></i>
+          </div>
+          <div>
+            <h3 class="fw-bold text-dark mb-0">Submit a Support Complaint</h3>
+            <p class="text-muted small mb-0">Describe your issue in detail. A unique ticket ID will be generated upon submission.</p>
+          </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('main.submit_complaint') }}" novalidate>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Customer Name</label>
+              <input type="text" class="form-control bg-light" value="{{ session.get('user_name') }}" readonly>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-control bg-light" value="{{ session.get('user_email') }}" readonly>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="subject" class="form-label">Subject / Issue Summary <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="subject" name="subject" value="{{ subject or '' }}" placeholder="e.g., Delay in delivery of Order #9812 or Payment charged twice" required maxlength="200" autofocus>
+            <div class="form-text">A concise headline summarizing the core issue.</div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="product_service" class="form-label">Product / Service Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="product_service" name="product_service" value="{{ product_service or '' }}" placeholder="e.g., Pro Plan Subscription, Laptop X10, Express Delivery" required>
+            </div>
+            <div class="col-md-6">
+              <label for="reference_id" class="form-label">Order / Reference ID <span class="text-muted small">(Optional)</span></label>
+              <input type="text" class="form-control" id="reference_id" name="reference_id" value="{{ reference_id or '' }}" placeholder="e.g., ORD-2026-8941 or TXN-49102">
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="description" class="form-label">Detailed Complaint Description <span class="text-danger">*</span></label>
+            <textarea class="form-control" id="description" name="description" rows="6" placeholder="Provide complete details about what happened, steps you took, expected resolution, etc." required>{{ description or '' }}</textarea>
+            <div class="form-text">Minimum 10 characters. Be specific to expedite resolution.</div>
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between pt-3 border-top">
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary-custom">
+              <i class="bi bi-x-lg me-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary-custom px-4 shadow-sm">
+              <i class="bi bi-send-check me-2"></i> Submit Complaint
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

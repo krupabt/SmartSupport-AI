@@ -1,0 +1,17 @@
+# Account Security & Access FAQ
+
+## 1. Password Resets & Login Troubleshooting
+- If you forget your password, click "Forgot Password" on the login page to receive a secure time-limited reset link valid for 30 minutes.
+- If you do not receive the email within 5 minutes, check your spam/junk folder or verify that your registered email matches your account.
+- Multiple consecutive failed login attempts (5 attempts) will temporarily lock your account for 15 minutes to prevent brute-force attacks.
+
+## 2. Two-Factor Authentication (2FA)
+- Two-Factor Authentication can be enabled under Account Settings -> Security.
+- We support standard authenticator apps (Google Authenticator, Authy, Microsoft Authenticator) via TOTP QR codes.
+- Store your one-time backup recovery codes in a secure location. If you lose your 2FA device, support requires identity verification before manual 2FA reset.
+
+## 3. Suspected Unauthorized Access & Compromised Accounts
+If you notice unrecognized logins or changes to your profile:
+1. Immediately change your password and terminate all active sessions via Security Settings.
+2. Contact our security response team or open a Critical Priority ticket.
+3. Our security team will lock the account, review recent IP audit trails, and assist you in safely restoring credentials.

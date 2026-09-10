@@ -1,0 +1,25 @@
+# Payment and Refund Policy
+
+## 1. Overview
+SmartSupport AI and our affiliated merchant platforms are committed to customer satisfaction. This policy outlines the terms and conditions regarding payments, refunds, chargebacks, and transaction disputes.
+
+## 2. Refund Eligibility & Timeframes
+- **Standard Refund Window (0 to 14 Days):** Customers are eligible for a 100% full refund to their original payment method for any digital or physical product return initiated within 14 calendar days of the purchase date or delivery date.
+- **Extended Store Credit Window (15 to 30 Days):** Requests submitted between 15 and 30 calendar days following purchase/delivery are eligible for 100% store credit or exchange vouchers. Cash refunds are not provided after 14 days.
+- **After 30 Days:** Products and subscriptions past 30 days from purchase are strictly non-refundable, except where required by local statutory consumer protection laws.
+
+## 3. Processing Times
+- **Credit/Debit Card Refunds:** Once approved by our support team, refunds take 3 to 5 business days to reflect on the customer's bank statement.
+- **UPI & Net Banking:** UPI refunds are processed instantly or within 24 hours.
+- **PayPal & Digital Wallets:** Refunds are typically reflected within 1 to 2 business days.
+
+## 4. Failed Transactions & Double Charges
+If a customer account was debited but the order failed to generate or an accidental double charge occurred:
+1. The automated payment gateway reconciles duplicate charges within 24 hours.
+2. If funds are not auto-reversed after 48 hours, customers should submit their Transaction Reference ID or Bank UTR number to Support.
+3. Our billing department will manually verify and release the hold within 1 business day.
+
+## 5. Non-Refundable Items & Services
+- Custom software integrations and setup fees once engineering labor has commenced.
+- Gift cards and promotional credits.
+- Downloaded digital consumables or one-time API token bundles that have been depleted by more than 10%.

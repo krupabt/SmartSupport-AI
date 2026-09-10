@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Create an Account — SmartSupport AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="saas-card p-4 p-md-5">
+        <div class="text-center mb-4">
+          <div class="brand-icon mx-auto mb-3" style="width: 44px; height: 44px; font-size: 1.4rem;">
+            <i class="bi bi-person-plus"></i>
+          </div>
+          <h3 class="fw-bold text-dark">Get Started</h3>
+          <p class="text-muted small">Create your SmartSupport account</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.register') }}" novalidate>
+          <div class="mb-3">
+            <label for="name" class="form-label">Full Name</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-person"></i></span>
+              <input type="text" class="form-control border-start-0 ps-0" id="name" name="name" value="{{ name or '' }}" placeholder="John Doe" required autofocus>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email Address</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-envelope"></i></span>
+              <input type="email" class="form-control border-start-0 ps-0" id="email" name="email" value="{{ email or '' }}" placeholder="name@company.com" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="role" class="form-label">Account Type</label>
+            <select class="form-select" id="role" name="role">
+              <option value="customer" selected>Customer (Submit &amp; Track Complaints)</option>
+              <option value="support">Support Agent / Admin (Manage Queue &amp; RAG)</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-key"></i></span>
+              <input type="password" class="form-control border-start-0 ps-0" id="password" name="password" placeholder="At least 6 characters" required>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="confirm_password" class="form-label">Confirm Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-check2-circle"></i></span>
+              <input type="password" class="form-control border-start-0 ps-0" id="confirm_password" name="confirm_password" placeholder="Re-enter password" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary-custom w-100 py-2 mb-3">
+            <i class="bi bi-person-check me-2"></i> Register Account
+          </button>
+
+          <div class="text-center">
+            <span class="text-muted small">Already have an account?</span>
+            <a href="{{ url_for('auth.login') }}" class="text-primary fw-semibold small text-decoration-none ms-1">Sign in here</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
