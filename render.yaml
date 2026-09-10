@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: smartsupport-ai
+    env: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    region: oregon
+    healthCheckPath: /api/health
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: RAG_SIMILARITY_THRESHOLD
+        value: "0.25"
+      - key: RAG_TOP_K
+        value: "5"
+      - key: AI_CONFIDENCE_THRESHOLD
+        value: "0.70"
+      - key: RAG_CONFIDENCE_THRESHOLD
+        value: "0.60"
+      - key: AUTO_ESCALATE_CRITICAL
+        value: "true"
+      - key: AUTO_ESCALATE_SECURITY
+        value: "true"
+      - key: MAX_CONTENT_LENGTH
+        value: "16777216"
