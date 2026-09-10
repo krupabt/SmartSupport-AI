@@ -6,7 +6,7 @@
 
 ## 🔗 Live Demo
 
-Live Demo: [Open SmartSupport AI](https://chatgpt.com/c/YOUR_LIVE_DEMO_URL)
+Live Demo: [Open SmartSupport AI](http://127.0.0.1:5000/)
 
 > Try the deployed application using the link above.
 
@@ -14,7 +14,7 @@ Live Demo: [Open SmartSupport AI](https://chatgpt.com/c/YOUR_LIVE_DEMO_URL)
 
 ## 🎥 Demo Video
 
-Demo Video: [Watch the SmartSupport AI Demo](https://chatgpt.com/c/YOUR_DEMO_VIDEO_URL)
+Demo Video: [Watch the SmartSupport AI Demo](http://127.0.0.1:5000/)
 
 > A short walkthrough demonstrating user registration, login, complaint submission, AI analysis, RAG-based response generation, and resolution.
 
