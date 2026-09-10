@@ -54,16 +54,8 @@ def register():
             db.session.add(new_user)
             db.session.commit()
 
-            # Set session
-            session["user_id"] = new_user.id
-            session["user_name"] = new_user.name
-            session["user_email"] = new_user.email
-            session["user_role"] = new_user.role
-
-            flash("Registration successful! Welcome to SmartSupport AI.", "success")
-            if new_user.is_support:
-                return redirect(url_for("main.admin_dashboard"))
-            return redirect(url_for("main.dashboard"))
+            flash("Account created successfully! Please log in with your credentials.", "success")
+            return redirect(url_for("auth.login"))
         except Exception as e:
             db.session.rollback()
             flash("An error occurred during registration. Please try again.", "danger")
@@ -119,4 +111,4 @@ def logout():
     """Handle user logout."""
     session.clear()
     flash("You have been securely logged out.", "info")
-    return redirect(url_for("main.index"))
+    return redirect(url_for("auth.login"))

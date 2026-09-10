@@ -89,6 +89,13 @@ def test_complete_integrated_phases_1_to_6_e2e_flow(client, app, tmp_path):
     }, follow_redirects=True)
     assert reg_res.status_code == 200
 
+    login_res = client.post("/login", data={
+        "email": "david@test.com",
+        "password": "password123",
+    }, follow_redirects=True)
+    assert login_res.status_code == 200
+    assert b"Welcome" in login_res.data
+
     # -------------------------------------------------------------
     # 3. Complaint Submission
     # -------------------------------------------------------------

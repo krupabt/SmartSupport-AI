@@ -423,5 +423,9 @@ def test_error_and_authorization_guards(client):
         "confirm_password": "password123",
         "role": "customer",
     })
+    client.post("/login", data={
+        "email": "tester@test.com",
+        "password": "password123",
+    })
     invalid_ticket = client.get("/tickets/TKT-2026-999999")
     assert invalid_ticket.status_code == 404

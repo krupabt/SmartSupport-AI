@@ -56,7 +56,7 @@ def test_user_registration(client, app):
     }, follow_redirects=True)
 
     assert response.status_code == 200
-    assert b"Welcome to SmartSupport AI" in response.data
+    assert b"Account created successfully" in response.data
 
     with app.app_context():
         user = User.query.filter_by(email="jane@example.com").first()
@@ -78,9 +78,6 @@ def test_duplicate_registration_handling(client):
         "confirm_password": "password123",
         "role": "customer"
     })
-
-    # Clear session/logout before second registration attempt
-    client.get("/logout")
 
     # Second registration with same email
     response = client.post("/register", data={
@@ -106,9 +103,6 @@ def test_user_login_and_logout(client):
         "role": "customer"
     })
 
-    # Logout
-    client.get("/logout", follow_redirects=True)
-
     # Login
     login_res = client.post("/login", data={
         "email": "loginuser@example.com",
@@ -119,10 +113,11 @@ def test_user_login_and_logout(client):
     assert b"Welcome back, Login User!" in login_res.data
     assert b"Customer Dashboard" in login_res.data
 
-    # Logout again
+    # Logout
     logout_res = client.get("/logout", follow_redirects=True)
     assert logout_res.status_code == 200
     assert b"You have been securely logged out" in logout_res.data
+    assert b"Sign in to your customer or support account" in logout_res.data
 
 
 def test_invalid_login(client):
@@ -135,8 +130,6 @@ def test_invalid_login(client):
         "confirm_password": "correctpassword",
         "role": "customer"
     })
-
-    client.get("/logout")
 
     # Attempt login with wrong password
     response = client.post("/login", data={
@@ -157,13 +150,17 @@ def test_protected_customer_dashboard_redirect(client):
 
 def test_unauthorized_admin_access(client):
     """Test customer role attempting to access admin dashboard receives 403 Forbidden."""
-    # Register customer
+    # Register and login customer
     client.post("/register", data={
         "name": "Normal Customer",
         "email": "customer@example.com",
         "password": "password123",
         "confirm_password": "password123",
         "role": "customer"
+    })
+    client.post("/login", data={
+        "email": "customer@example.com",
+        "password": "password123"
     })
 
     # Customer attempts to access /admin/dashboard
@@ -175,13 +172,17 @@ def test_unauthorized_admin_access(client):
 
 def test_authorized_support_admin_access(client):
     """Test support/admin role can access admin dashboard."""
-    # Register support agent
+    # Register and login support agent
     client.post("/register", data={
         "name": "Support Agent",
         "email": "agent@example.com",
         "password": "password123",
         "confirm_password": "password123",
         "role": "support"
+    })
+    client.post("/login", data={
+        "email": "agent@example.com",
+        "password": "password123"
     })
 
     response = client.get("/admin/dashboard")

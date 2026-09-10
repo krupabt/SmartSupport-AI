@@ -7,12 +7,15 @@
   <!-- Welcome Header -->
   <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between pb-4 mb-4 border-bottom gap-3">
     <div>
-      <h2 class="fw-bold text-dark mb-1">Welcome back, {{ user_name }}!</h2>
+      <h2 class="fw-bold text-dark mb-1">Welcome, {{ user_name }}!</h2>
       <p class="text-muted mb-0">Track your support requests, complaints, and resolution updates in real-time.</p>
     </div>
-    <div>
+    <div class="d-flex align-items-center gap-2">
       <a href="{{ url_for('main.submit_complaint') }}" class="btn btn-primary-custom shadow-sm">
         <i class="bi bi-plus-lg me-1"></i> Submit New Complaint
+      </a>
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger shadow-sm">
+        <i class="bi bi-box-arrow-right me-1"></i> Logout
       </a>
     </div>
   </div>
