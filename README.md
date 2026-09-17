@@ -19,6 +19,7 @@ Demo Video: [Watch the SmartSupport AI Demo](http://127.0.0.1:5000/)
 > A short walkthrough demonstrating user registration, login, complaint submission, AI analysis, RAG-based response generation, and resolution.
 
  **Demo Images**
+ 
  <img width="1811" height="1006" alt="image" src="https://github.com/user-attachments/assets/a707b098-8fee-4534-bc36-977e3998272d" />
  <img width="1778" height="971" alt="image" src="https://github.com/user-attachments/assets/04bbcf4e-6826-4208-8da9-04ea995728cf" />
  <img width="1760" height="1018" alt="image" src="https://github.com/user-attachments/assets/9531584b-1fcd-4f90-86b9-db778d637ec2" />
